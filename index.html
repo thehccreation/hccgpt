@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>HCC GPT</title>
+<style>
+  *{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+    html,body{
+    overflow-y: hidden;
+    }
+  body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+    height: 100vh;
+    /* background-color: #ffc08c; */
+    background: url(https://ik.imagekit.io/tovuwazhze/web%20project/bg.jpg?updatedAt=1723545120427);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  
+  #chat-container {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.185);
+    min-width: 800px;
+    width: 80%;
+    max-width: 800px;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  
+  h1 {
+    color: white;
+    text-align: center;
+    margin:30px 0px 20px;
+  }
+  ::-webkit-scrollbar {
+  width: 0px;
+}
+  #chat-history {
+    background: rgba(119, 119, 119, 0);
+    /* backdrop-filter: blur(10px); */
+    /* border: 1px solid black; */
+    margin: 20px 0px 10px;
+    max-height: 80%;
+    border-radius: 10px;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    padding: 5px 0;
+    
+  }
+
+
+  .user-message {
+    color: white;
+    text-align: right;
+    padding: 10px;
+    background-color: #8a46ca;
+    border-radius: 10px;
+    margin-bottom: 5px;
+  }
+  
+  
+  .bot-message {
+    text-align: left;
+    padding: 10px;
+    background-color: #e68d45;
+    border-radius: 10px;
+    margin-bottom: 5px;
+  }
+  
+  form {
+    display: flex;
+    margin: 5px 0px 10px;
+  }
+  
+  input {
+    flex-grow: 1;
+    margin-right: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: sans-serif;
+    font-size: 15px;
+  }
+  input:focus{
+    background-color:white;
+    outline: 0;
+  }
+  button {
+    background-color: rgba(255, 255, 255, 0.816);
+    color: rgba(255, 255, 255, 0.602);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  button:hover{
+    background-color: rgb(255, 255, 255);
+  }
+  #loader {
+  display: none; 
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+  </style>
+</head>
+<body>
+  <h1>HCC GPT</h1>
+  <div id="chat-container">
+  <div id="chat-history"></div>
+  <form id="chat-form">
+    <input type="text" id="user-input" placeholder="Ask your Question...">
+    <button type="submit"><img width="24" height="24" src="https://img.icons8.com/material-outlined/24/sent.png" alt="sent"/></button>
+  </form>
+</div>
+<div id="loader">
+  <img src="https://ik.imagekit.io/tovuwazhze/web%20project/loader.gif?updatedAt=1723545289215" width="150px">
+</div>
+
+  <script>
+    const chatHistory = document.getElementById('chat-history');
+    const userInput = document.getElementById('user-input');
+    const form = document.getElementById('chat-form');
+
+    async function sendMessage() {
+      const userMessage = userInput.value;
+      userInput.value = ''; // Clear input field
+      console.log(userMessage)
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userInput: userMessage }),
+        });
+
+        const data = await response.json();
+        console.log(data)
+        const botMessage = data.response;
+        console.log(botMessage)
+        // Add chat message to the chat history
+        chatHistory.innerHTML += `<div class="user-message">${userMessage}</div>`;
+        chatHistory.innerHTML += `<div class="bot-message">${botMessage}</div>`;
+
+        // Scroll to the bottom of the chat history
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      } catch (error) {
+        console.error('Error:', error);
+        // Handle errors gracefully, e.g., display an error message to the user
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault(); // Prevent form submission
+      const loader = document.getElementById('loader');
+      loader.style.display = 'block'; // Show the loader
+      sendMessage().finally(() => {
+      loader.style.display = 'none'; // Hide the loader after the message is sent
+    });;
+    });
+  </script>
+</body>
+</html>
