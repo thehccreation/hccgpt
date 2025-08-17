@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="https://ik.imagekit.io/tovuwazhze/homepage%20assets/hcc-favicon.jpg?updatedAt=1705154642736" type="image/x-icon">
+    <title>HCC GPT by thehccreation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and IE 11 */
+            user-select: none; /* Standard syntax */
+            display: flex;
+            flex-direction: column;
+        }
+        .logo {
+            width: 25px;
+            height: 25px;
+            margin-right: 8px;
+            filter: invert(1);
+        }
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: #513d37;
+            border-radius: 4px;
+        }
+        .chat-container::-webkit-scrollbar-track {
+            background-color: #271411;
+        }
+        /* Custom animation for the thinking dots */
+        @keyframes pulse-dots {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        .pulse-dots span {
+            animation: pulse-dots 1.5s infinite;
+        }
+        .pulse-dots span:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+        .pulse-dots span:nth-child(3) {
+            animation-delay: 1s;
+        }
+    </style>
+</head>
+<body class="bg-black text-white flex items-center justify-center min-h-screen p-4 sm:p-6 md:p-8">
+
+    <div class="bg-neutral-900 rounded-2xl shadow-xl w-full max-w-2xl flex flex-col h-[80vh] sm:h-[85vh] md:h-[90vh] border border-orange-800 ">
+        
+        <!-- Header -->
+        <header class="bg-neutral-900 p-4 sm:p-5 rounded-t-2xl flex items-center justify-between shadow-md">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-50 flex items-center"><a href="https://thehccreation.github.io/home/"><img class="logo" src="https://ik.imagekit.io/tovuwazhze/homepage%20assets/hcc-logo-transparent.png?updatedAt=1722260211390"></a>HCC GPT</h1>
+            <div id="status-indicator" class="w-3 h-3 rounded-full bg-green-500 animate-pulse" title="Connected"></div>
+        </header>
+
+        <!-- Chat messages container -->
+        <div id="chat-container" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 chat-container">
+            <!-- Chat messages will be dynamically added here -->
+            <div class="flex justify-start">
+                <div class="bg-neutral-800 text-white p-3 rounded-xl rounded-bl-none shadow-md max-w-[80%]">
+                    Welcome to <b style="color: orange;">HCC GPT</b>, powered by the <u>Gemini 2.5 Flash model.</u> You can ask me anything, and I'll do my best to assist you.
+                </div>
+            </div>
+        </div>
+
+        <!-- Input area and send button -->
+        <div class="p-4 sm:p-5 bg-neutral-900 rounded-b-2xl shadow-inner flex items-center space-x-3">
+            <input type="text" id="user-input" placeholder="Type your message..." class="flex-1 bg-neutral-800 text-white p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 placeholder-gray-400">
+            <button id="send-button" class="bg-white hover:bg-gray-200 text-black font-bold p-3 rounded-full shadow-lg transition-transform transform active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 fill-orange-600">
+                    <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.599 60.599 0 0018.445-8.986.75.75 0 000-1.218A60.599 60.599 0 003.478 2.405z" />
+                </svg>
+            </button>
+        </div>
+        <p style="font-size: 10px; text-align: center; padding-bottom: 5px; color: gray;">HCC GPT can make Mistakes, so check it.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const chatContainer = document.getElementById('chat-container');
+            const statusIndicator = document.getElementById('status-indicator');
+
+            // Function to append a message bubble to the chat container
+            const appendMessage = (sender, message) => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('flex', sender === 'user' ? 'justify-end' : 'justify-start');
+
+                const messageBubble = document.createElement('div');
+                messageBubble.classList.add('p-3', 'rounded-xl', 'shadow-md', 'max-w-[80%]');
+                messageBubble.classList.add(sender === 'user' ? 'bg-white' : 'bg-neutral-800');
+                messageBubble.classList.add(sender === 'user' ? 'text-black' : 'text-white');
+                messageBubble.classList.add(sender === 'user' ? 'rounded-br-none' : 'rounded-bl-none');
+                messageBubble.innerText = message;
+                messageBubble.style.whiteSpace = 'pre-wrap';
+
+                messageElement.appendChild(messageBubble);
+                chatContainer.appendChild(messageElement);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            };
+
+            // Function to add a thinking indicator message
+            const appendThinkingMessage = () => {
+                const messageElement = document.createElement('div');
+                messageElement.id = 'thinking-message';
+                messageElement.classList.add('flex', 'justify-start');
+
+                const messageBubble = document.createElement('div');
+                messageBubble.classList.add('p-3', 'rounded-xl', 'rounded-bl-none', 'bg-neutral-800', 'text-white', 'shadow-md', 'max-w-[80%]');
+
+                // The pulsing dots for the thinking animation
+                const dots = document.createElement('span');
+                dots.classList.add('pulse-dots', 'space-x-1');
+                dots.innerHTML = 'Thinking<span class="opacity-0">.</span><span class="opacity-0">.</span><span class="opacity-0">.</span>';
+                
+                messageBubble.appendChild(dots);
+                messageElement.appendChild(messageBubble);
+                chatContainer.appendChild(messageElement);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                return messageElement;
+            };
+
+            // Main function to handle user input and API call
+            const handleUserInput = async () => {
+                const prompt = userInput.value.trim();
+                if (prompt === '') return;
+
+                // Display user's message
+                appendMessage('user', prompt);
+                userInput.value = '';
+
+                // Add the thinking indicator
+                const thinkingMessageEl = appendThinkingMessage();
+                
+                // Change status indicator in header
+                statusIndicator.classList.add('bg-yellow-500');
+                statusIndicator.classList.remove('bg-green-500');
+                statusIndicator.title = 'Thinking...';
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "AIzaSyBdhbAKrG-q595Cwcs_Kw2bax9s1rDroiE" 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                    
+                    let response;
+                    let retryCount = 0;
+                    const maxRetries = 3;
+                    const baseDelay = 1000;
+
+                    while (retryCount < maxRetries) {
+                        try {
+                            response = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (response.ok) {
+                                break;
+                            } else if (response.status === 429) {
+                                retryCount++;
+                                const delay = baseDelay * Math.pow(2, retryCount);
+                                await new Promise(res => setTimeout(res, delay));
+                                console.warn(`Rate limit exceeded. Retrying in ${delay / 1000} seconds...`);
+                            } else {
+                                throw new Error(`API returned status code: ${response.status}`);
+                            }
+                        } catch (error) {
+                            console.error('Fetch error:', error);
+                            throw error;
+                        }
+                    }
+
+                    // Remove the thinking indicator immediately after the response is received
+                    thinkingMessageEl.remove();
+
+                    if (!response || !response.ok) {
+                        appendMessage('gemini', 'Sorry, I am unable to connect to the API right now. Please try again later.');
+                        return;
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 && 
+                        result.candidates[0].content && result.candidates[0].content.parts && 
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        appendMessage('gemini', text);
+                    } else {
+                        appendMessage('gemini', 'Sorry, I couldn\'t generate a response. The API response was empty or malformed.');
+                    }
+                } catch (error) {
+                    // Remove the thinking indicator in case of an error
+                    if (thinkingMessageEl) {
+                        thinkingMessageEl.remove();
+                    }
+                    console.error('An error occurred:', error);
+                    appendMessage('gemini', 'An unexpected error occurred. Please try again later.');
+                } finally {
+                    // Revert status indicator in header
+                    statusIndicator.classList.remove('bg-yellow-500');
+                    statusIndicator.classList.add('bg-green-500');
+                    statusIndicator.title = 'Connected';
+                }
+            };
+
+            // Event listeners for sending message
+            sendButton.addEventListener('click', handleUserInput);
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleUserInput();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
